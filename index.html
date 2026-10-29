@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Lost &amp; Found Hub</title>
+<style>
+:root{--bg:#eef3f6;--card:#fff;--ink:#12263a;--mute:#5d7184;--line:#d5dee6;--pri:#0b6e8a;--on:#fff;--lost:#c2410c;--lostbg:#fde9dd;--found:#0f766e;--foundbg:#d9f3ef;--ok:#15803d;--warn:#a16207;--bad:#b91c1c;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0d1a24;--card:#152634;--ink:#e6eef4;--mute:#97aab9;--line:#2a3f50;--pri:#4cc2e0;--on:#06202b;--lost:#fb9a68;--lostbg:#3a2418;--found:#5fd6c8;--foundbg:#12342f;--ok:#4ade80;--warn:#facc15;--bad:#f87171;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0d1a24;--card:#152634;--ink:#e6eef4;--mute:#97aab9;--line:#2a3f50;--pri:#4cc2e0;--on:#06202b;--lost:#fb9a68;--lostbg:#3a2418;--found:#5fd6c8;--foundbg:#12342f;--ok:#4ade80;--warn:#facc15;--bad:#f87171;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 "Plus Jakarta Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.app{max-width:480px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column}
+header{padding:20px 18px 12px}
+h1{font-size:26px;margin:0;letter-spacing:-.02em}
+header p{margin:2px 0 0;color:var(--mute);font-size:14px}
+main{flex:1;padding:0 18px 90px}
+.tabs{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px solid var(--line);display:flex;justify-content:center;padding-bottom:env(safe-area-inset-bottom,0px)}
+.tabs div{display:flex;width:100%;max-width:480px}
+.tabs button{flex:1;padding:14px 4px;border:0;background:none;color:var(--mute);font:600 14px inherit;font-family:inherit;cursor:pointer}
+.tabs button[aria-selected=true]{color:var(--pri);box-shadow:inset 0 3px 0 var(--pri)}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid var(--pri);outline-offset:2px}
+input,select,textarea{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink);font:inherit}
+label{display:block;font-weight:600;font-size:14px;margin:14px 0 5px}
+.hint{font-size:13px;color:var(--mute);margin:4px 0 0}
+.chips{display:flex;gap:8px;margin:12px 0}
+.chip{padding:7px 14px;border-radius:99px;border:1px solid var(--line);background:var(--card);color:var(--ink);font:600 13px inherit;font-family:inherit;cursor:pointer}
+.chip[aria-pressed=true]{background:var(--pri);color:var(--on);border-color:var(--pri)}
+.item{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin:10px 0;display:flex;gap:12px;align-items:flex-start}
+.ico{font-size:28px;width:48px;height:48px;border-radius:12px;display:grid;place-items:center;flex:none}
+.item.lost .ico{background:var(--lostbg)}.item.found .ico{background:var(--foundbg)}
+.item h3{margin:0;font-size:16px}
+.meta{font-size:13px;color:var(--mute)}
+.tag{display:inline-block;font-size:12px;font-weight:700;padding:2px 9px;border-radius:99px;margin-right:6px}
+.tag.lost{background:var(--lostbg);color:var(--lost)}.tag.found{background:var(--foundbg);color:var(--found)}
+.btn{display:block;width:100%;padding:13px;border:0;border-radius:12px;background:var(--pri);color:var(--on);font:700 16px inherit;font-family:inherit;cursor:pointer;margin-top:18px}
+.btn.sec{background:none;border:1px solid var(--line);color:var(--ink);margin-top:10px}
+.btn.small{display:inline-block;width:auto;padding:8px 14px;font-size:14px;margin:8px 0 0}
+.seg{display:flex;gap:8px}.seg .chip{flex:1;padding:11px}
+.sheet{position:fixed;inset:0;background:rgba(5,15,25,.55);display:none;align-items:flex-end;justify-content:center;z-index:5}
+.sheet.on{display:flex}
+.panel{background:var(--bg);width:100%;max-width:480px;max-height:92vh;overflow:auto;border-radius:20px 20px 0 0;padding:18px 18px calc(24px + env(safe-area-inset-bottom,0px))}
+.result{border-radius:12px;padding:14px;margin-top:16px;border:1px solid var(--line);background:var(--card)}
+.bar{height:10px;border-radius:9px;background:var(--line);overflow:hidden;margin:8px 0}
+.bar i{display:block;height:100%;width:0;transition:width .6s}
+.empty{text-align:center;color:var(--mute);padding:36px 10px}
+.toast{position:fixed;left:50%;bottom:80px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:10px;font-size:14px;display:none;z-index:9}
+.ph{width:48px;height:48px;border-radius:12px;object-fit:cover;flex:none}
+@media (prefers-reduced-motion:reduce){.bar i{transition:none}}
+</style>
+</head>
+<body>
+<div class="app">
+<header><h1>Lost &amp; Found Hub</h1><p id="sub">Campus lost &amp; found, with smart owner checks</p></header>
+<main id="main"></main>
+</div>
+<nav class="tabs" aria-label="Main"><div>
+<button id="t-browse" aria-selected="true">Browse</button>
+<button id="t-post" aria-selected="false">Post</button>
+<button id="t-how" aria-selected="false">Guide</button>
+<button id="t-alerts" aria-selected="false">Alerts</button>
+<button id="t-admin" aria-selected="false">Security</button>
+</div></nav>
+<div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-label="Claim item"><div class="panel" id="panel"></div></div>
+<div class="toast" id="toast" role="status"></div>
+<script>
+var ICONS={Phone:"📱",Wallet:"👛",Keys:"🔑",Bag:"🎒",Books:"📚",ID:"💳",Other:"📦"};
+var items=[
+{id:1,type:"found",title:"Black phone with blue case",cat:"Phone",place:"Library, 2nd floor",when:"Today, 11:20",desc:"Found on a reading table. Screen is locked.",secret:"cracked screen top right, wallpaper shows a white cat, blue case has a sticker"},
+{id:2,type:"lost",title:"Student ID card",cat:"ID",place:"Cafeteria",when:"Yesterday",desc:"Name starts with A. Please contact me if found.",secret:""},
+{id:3,type:"found",title:"Silver key bundle",cat:"Keys",place:"Bus stop near main gate",when:"Yesterday, 4 pm",desc:"Three keys on a ring.",secret:"red keychain shaped like a football, small brass key, lock with number 14"},
+{id:4,type:"lost",title:"Grey laptop bag",cat:"Bag",place:"CS lab",when:"2 days ago",desc:"Has a charger and a notebook inside.",secret:""}
+];
+var nid=5,filter="all",q="",claims=[],notes=[],cid=1,user={name:"",roll:""};
+var $=function(s){return document.querySelector(s)};
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+function toast(m){var t=$("#toast");t.textContent=m;t.style.display="block";setTimeout(function(){t.style.display="none"},2400)}
+function setTab(n){["browse","post","how","alerts","admin"].forEach(function(k){$("#t-"+k).setAttribute("aria-selected",k==n)});({browse:browse,post:post,how:how,alerts:alertsView,admin:admin})[n]();window.scrollTo(0,0)}
+["browse","post","how","alerts","admin"].forEach(function(k){$("#t-"+k).onclick=function(){setTab(k)}});
+
+function browse(){
+ var list=items.filter(function(i){return(filter=="all"||i.type==filter)&&(i.title+i.place+i.cat+i.desc).toLowerCase().indexOf(q.toLowerCase())>-1});
+ var h='<input id="s" type="search" placeholder="Search phone, keys, library…" aria-label="Search items" value="'+esc(q)+'">'+
+ '<div class="chips">'+[["all","All"],["lost","Lost"],["found","Found"]].map(function(f){return'<button class="chip" data-f="'+f[0]+'" aria-pressed="'+(filter==f[0])+'">'+f[1]+'</button>'}).join("")+'</div>';
+ h+=list.length?list.map(function(i){return'<div class="item '+i.type+'">'+(i.img?'<img class="ph" alt="" src="'+i.img+'">':'<div class="ico" aria-hidden="true">'+ICONS[i.cat]+'</div>')+'<div><span class="tag '+i.type+'">'+(i.type=="lost"?"Lost":"Found")+'</span><h3>'+esc(i.title)+'</h3><div class="meta">'+esc(i.place)+' · '+esc(i.when)+'</div><div class="meta">'+esc(i.desc)+'</div>'+
+ (i.type=="found"?'<button class="btn small" data-claim="'+i.id+'">This is mine</button>':'<button class="btn small sec" data-seen="'+i.id+'">I found this</button>')+'</div></div>'}).join(""):'<div class="empty">No items match. Try another word or post your own.</div>';
+ $("#main").innerHTML=h;
+ var s=$("#s");s.oninput=function(){q=s.value;var p=s.selectionStart;browse();var n=$("#s");n.focus();n.setSelectionRange(p,p)};
+ document.querySelectorAll("[data-f]").forEach(function(b){b.onclick=function(){filter=b.dataset.f;browse()}});
+ document.querySelectorAll("[data-claim]").forEach(function(b){b.onclick=function(){claim(+b.dataset.claim)}});
+ document.querySelectorAll("[data-seen]").forEach(function(b){b.onclick=function(){var it=items.filter(function(x){return x.id==b.dataset.seen})[0];notify('You told the owner of "'+it.title+'" that you found it. In a real app the owner receives this alert and can contact you through the security desk.');toast("Owner notified. See Alerts tab")}});
+}
+
+var pt="lost";
+function post(){
+ $("#main").innerHTML='<div class="seg" role="group" aria-label="Item type"><button class="chip" data-t="lost" aria-pressed="'+(pt=="lost")+'">I lost something</button><button class="chip" data-t="found" aria-pressed="'+(pt=="found")+'">I found something</button></div>'+
+ '<label for="p-title">What is it?</label><input id="p-title" placeholder="e.g. Black phone with blue case">'+
+ '<label for="p-cat">Category</label><select id="p-cat">'+Object.keys(ICONS).map(function(k){return'<option>'+k+'</option>'}).join("")+'</select>'+
+ '<label for="p-place">Where?</label><input id="p-place" placeholder="e.g. Library, 2nd floor">'+
+ '<label for="p-desc">Public description</label><textarea id="p-desc" rows="2" placeholder="Basic details anyone can see"></textarea>'+
+ (pt=="found"?'<label for="p-sec">Private details only the owner would know</label><textarea id="p-sec" rows="2" placeholder="e.g. wallpaper, scratches, stickers, what is inside"></textarea><p class="hint">This is never shown to others. It is used to check claims.</p>':'')+
+ '<label for="p-img">Photo (optional)</label><input id="p-img" type="file" accept="image/*"><button class="btn" id="p-go">Post item</button>';
+ document.querySelectorAll("[data-t]").forEach(function(b){b.onclick=function(){pt=b.dataset.t;post()}});
+ $("#p-go").onclick=function(){
+  var t=$("#p-title").value.trim(),pl=$("#p-place").value.trim();
+  if(!t||!pl){toast("Add what it is and where");return}
+  if(pt=="found"&&!$("#p-sec").value.trim()){toast("Add a private detail for verification");return}
+  items.unshift({id:nid++,img:$("#p-img").files[0]?URL.createObjectURL($("#p-img").files[0]):"",type:pt,title:t,cat:$("#p-cat").value,place:pl,when:"Just now",desc:$("#p-desc").value.trim()||"No extra details.",secret:pt=="found"?$("#p-sec").value:""});
+  var m=matchAlerts(items[0]);filter="all";q="";setTab("browse");toast(m?"Item posted. Possible match found, see Alerts":"Item posted")};
+}
+
+function words(s){return(s.toLowerCase().match(/[a-z0-9]+/g)||[]).filter(function(w){return w.length>3&&["with","that","this","have","from","shows","there"].indexOf(w)<0})}
+function claim(id){
+ var it=items.filter(function(x){return x.id==id})[0];
+ $("#panel").innerHTML='<h2 style="margin:0 0 4px">Prove it is yours</h2><p class="meta" style="margin:0">'+esc(it.title)+' · '+esc(it.place)+'</p>'+
+ '<label for="c-d">Describe it without seeing it</label><textarea id="c-d" rows="4" placeholder="Mention marks, stickers, wallpaper, items inside…"></textarea><p class="hint">Demo tip: try the details a real owner would know. The finder\'s private notes are matched against your answer.</p>'+
+ '<button class="btn" id="c-go">Check my claim</button><button class="btn sec" id="c-x">Close</button><div id="c-r"></div>';
+ $("#sheet").classList.add("on");
+ $("#c-x").onclick=function(){$("#sheet").classList.remove("on")};
+ $("#c-go").onclick=function(){
+  var a=words($("#c-d").value),s=words(it.secret),hit=s.filter(function(w){return a.indexOf(w)>-1}),p=Math.round(hit.length/s.length*100),c,m,tx;
+  if(!$("#c-d").value.trim()){toast("Write a description first");return}
+  if(p>=60){c="var(--ok)";m="Strong match";tx="Your details match. The finder is notified and can arrange a handover at a safe public spot."}
+  else if(p>=30){c="var(--warn)";m="Possible match";tx="Some details match. The finder will review your answer before sharing contact details."}
+  else{c="var(--bad)";m="Not matching";tx="Your description does not match what the finder noted. Check again or add more specific details."}
+  if(p>=30)claims.push({id:cid++,item:it.title,by:user.name||"Student",p:p,text:$("#c-d").value,st:"pending"});$("#c-r").innerHTML='<div class="result"><strong style="color:'+c+'">'+m+' · '+p+'%</strong><div class="bar"><i id="c-b" style="background:'+c+'"></i></div><div class="meta">'+tx+'</div></div>';
+  setTimeout(function(){$("#c-b").style.width=p+"%"},30)};
+}
+
+function how(){
+ $("#main").innerHTML='<div class="item found"><div class="ico" aria-hidden="true">1️⃣</div><div><h3>Post</h3><div class="meta">Lost something or found something? Add a title, place and short description.</div></div></div>'+
+ '<div class="item found"><div class="ico" aria-hidden="true">2️⃣</div><div><h3>Add private details</h3><div class="meta">Finders note things only the owner knows. These stay hidden from everyone.</div></div></div>'+
+ '<div class="item found"><div class="ico" aria-hidden="true">3️⃣</div><div><h3>Verify the owner</h3><div class="meta">A claimer describes the item. The app compares it with the private details and gives a match score, which reduces false claims.</div></div></div>'+
+ '<div class="item found"><div class="ico" aria-hidden="true">4️⃣</div><div><h3>Hand over safely</h3><div class="meta">Meet at a public spot like the library desk or security office.</div></div></div>'+
+ '<p class="hint">This is a prototype. The match score here is simple word matching. A real version would use an AI model and a database.</p>';
+}
+function admin(){
+ var h='<p class="hint">Security desk view: review claims and confirm the handover.</p>';
+ h+=claims.length?claims.map(function(c){return'<div class="item found"><div class="ico" aria-hidden="true">🛡️</div><div><h3>'+esc(c.item)+'</h3><div class="meta">Claimed by '+esc(c.by)+' · match '+c.p+'%</div><div class="meta">"'+esc(c.text)+'"</div>'+(c.st=="pending"?'<button class="btn small" data-ok="'+c.id+'">Approve handover</button> <button class="btn small sec" data-no="'+c.id+'">Reject</button>':'<span class="tag '+(c.st=="approved"?"found":"lost")+'">'+c.st+'</span>')+'</div></div>'}).join(""):'<div class="empty">No claims yet. Claim a found item from Browse first.</div>';
+ $("#main").innerHTML=h;
+ function set(id,st){var c=claims.filter(function(x){return x.id==id})[0];c.st=st;if(st=="approved")items=items.filter(function(x){return x.title!=c.item});admin();toast(st=="approved"?"Handover approved, item removed from list":"Claim rejected")}
+ document.querySelectorAll("[data-ok]").forEach(function(b){b.onclick=function(){set(b.dataset.ok,"approved")}});
+ document.querySelectorAll("[data-no]").forEach(function(b){b.onclick=function(){set(b.dataset.no,"rejected")}});
+}
+function login(){
+ $(".tabs").style.display="none";
+ $("#main").innerHTML='<h2 style="margin:8px 0">Sign in with your campus ID</h2><label for="l-n">Name</label><input id="l-n" autocomplete="name"><label for="l-r">Roll number</label><input id="l-r" placeholder="Your campus roll number"><p class="hint">Demo only. Nothing is saved or sent anywhere.</p><button class="btn" id="l-go">Continue</button>';
+ $("#l-go").onclick=function(){var n=$("#l-n").value.trim(),r=$("#l-r").value.trim();if(!n||!r){toast("Enter your name and roll number");return}user={name:n,roll:r};$("#sub").textContent="Hi "+n+" · "+r;$(".tabs").style.display="";browse()};
+}
+function notify(t,q2){notes.unshift({t:t,q:q2||"",seen:false});badge()}
+function badge(){var n=notes.filter(function(x){return!x.seen}).length;$("#t-alerts").textContent="Alerts"+(n?" ("+n+")":"")}
+function matchAlerts(it){var c=0,w=words(it.title+" "+it.place);items.forEach(function(o){if(o===it||o.type==it.type)return;var sh=words(o.title+" "+o.place).filter(function(x){return w.indexOf(x)>-1}).length;if((o.cat==it.cat&&sh>=1)||sh>=2){c++;var lost=it.type=="lost"?it:o,found=it.type=="lost"?o:it;notify('Possible match: lost "'+lost.title+'" may be the found "'+found.title+'" (found at '+found.place+'). Open it and verify ownership.',it.type=="lost"?o.title:it.title)}});return c}
+function alertsView(){var h='<p class="hint">Alerts appear when someone says they found your item, or when a new post looks like a match for an old one. Matching here uses category and shared words. A real version would use AI.</p>';h+=notes.length?notes.map(function(n,i){return'<div class="item found"><div class="ico" aria-hidden="true">🔔</div><div><div class="meta">'+esc(n.t)+'</div>'+(n.q?'<button class="btn small sec" data-open="'+i+'">Open in Browse</button>':'')+'</div></div>'}).join(""):'<div class="empty">No alerts yet. Post a lost item, or tap "I found this" on a lost item.</div>';$("#main").innerHTML=h;notes.forEach(function(n){n.seen=true});badge();document.querySelectorAll("[data-open]").forEach(function(b){b.onclick=function(){q=notes[+b.dataset.open].q;filter="all";setTab("browse")}})}
+login();
+</script>
+</body>
+</html>
